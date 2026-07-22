@@ -193,14 +193,15 @@ export async function runBankCheck(taskId, { pyrusRequest, addCommentWithFieldUp
 
   // 11. Тип учреждения
   if (bank.opf?.type) {
-    if (bank.opf.type === 'BANK') {
+    const opfType = bank.opf.type;
+    if (opfType === 'BANK') {
       checks.push(`✅ Тип: Банк`);
-    } else if (bank.opf.type === 'BRANCH') {
+    } else if (opfType === 'BANK_BRANCH' || opfType === 'BRANCH') {
       issues.push(`⚠️ Тип: Филиал (не головной банк)`);
-    } else if (bank.opf.type === 'NKO') {
+    } else if (opfType === 'NKO') {
       issues.push(`⚠️ Тип: Небанковская кредитная организация (НКО)`);
     } else {
-      checks.push(`ℹ️ Тип: ${bank.opf.full || bank.opf.type}`);
+      checks.push(`ℹ️ Тип: ${bank.opf.full || opfType}`);
     }
   }
 
