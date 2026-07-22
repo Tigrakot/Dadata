@@ -21,12 +21,14 @@ export default async function handler(req, res) {
   try {
     console.log('[CRON] start check');
 
-    // Получаем все задачи формы
+    // Получаем только задачи, созданные за последние 5 минут
+    // Используем встроенный фильтр Pyrus — created_after
     const formId = 1530544;
-    const listRes = await pyrusRequest(`/forms/${formId}/register`);
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const listRes = await pyrusRequest(`/forms/${formId}/register?created_after=${encodeURIComponent(fiveMinAgo)}&item_count=20`);
 
     const tasks = listRes.tasks || [];
-    console.log(`[CRON] found ${tasks.length} tasks`);
+    console.log(`[CRON] found ${tasks.length} new tasks (created after ${fiveMinAgo})`);
 
     const results = [];
 
