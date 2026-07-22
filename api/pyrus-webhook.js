@@ -17,6 +17,7 @@ const FIELDS = {
   CORR_ACCOUNT: 90,
   ACCOUNT: 84,
   STATUS: 53,
+  CHECK_RESULT: 98,
 };
 
 export default async function handler(req, res) {
@@ -154,9 +155,17 @@ export default async function handler(req, res) {
 
     const fullComment = header + checksText + issuesText + footer;
 
-    const fieldUpdates = issues.length > 0
-      ? [{ id: FIELDS.STATUS, value: '❌ Реквизиты неверны' }]
-      : [{ id: FIELDS.STATUS, value: '✅ Реквизиты проверены' }];
+    const summary = issues.length === 0
+      ? `✅ OK — ${new Date().toLocaleString('ru-RU')}\n${bank.name?.payment}\nБИК: ${bik}\nКорр: ${bank.correspondent_account || '—'}`
+      : `❌ ОШИБКИ:\n${issues.map(i => i.split('\n')[0]).join('\n')}\n${new Date().toLocaleString('ru-RU')}`;
+
+    const fieldUpdates = [
+      { id: FIELDS.CHECK_RESULT, value: summary },
+      ...(issues.length > 0
+        ? [{ id: FIELDS.STATUS, value: '❌ Реквизиты неверны' }]
+        : [{ id: FIELDS.STATUS, value: '✅ Реквизиты проверены' }]
+      )
+    ];
 
     await addCommentWithFieldUpdate(taskId, fieldUpdates, fullComment);
 
